@@ -23,7 +23,7 @@ jobs:
       shell: python
       run: "import base64,hashlib,io,pathlib,tarfile\nsource=pathlib.Path('.github/workflows/moto-reto.yml').read_text()\n\
         blob=base64.b64decode(''.join(line[len('# MOTO_PAYLOAD '):] for line in source.splitlines() if line.startswith('#\
-        \ MOTO_PAYLOAD ')),validate=True)\nif hashlib.sha256(blob).hexdigest()!='feb5564024a7966cc055f2fe4062cf8e9c0fd5a146c1618a38db364889e6708c':\n\
+        \ MOTO_PAYLOAD ')),validate=True)\nif hashlib.sha256(blob).hexdigest()!='b842048a0b7bbb5f70edabc2e2e90b83cd4535f138249887f4af74ed5fcb5e01':\n\
         \    raise SystemExit('El proyecto está incompleto o modificado.')\nroot=pathlib.Path('_moto_reto');root.mkdir(exist_ok=True)\n\
         with tarfile.open(fileobj=io.BytesIO(blob),mode='r:xz') as tar:\n    for member in tar.getmembers():\n \
         \       path=pathlib.PurePosixPath(member.name)\n        if not member.isfile() or path.is_absolute() or\
@@ -66,7 +66,7 @@ jobs:
       run: python3 tools/run_checked.py godot --headless --editor --path . --import --quit
     - name: Probar reglas de carrera
       working-directory: _moto_reto
-      run: python3 tools/run_checked.py godot --headless --path . --script res://tests/race_test.gd
+      run: python3 tools/run_checked.py godot --headless --path . --quit-after 120 --script res://tests/race_test.gd
     - name: Preparar captura 3D
       run: 'sudo apt-get update -qq
 
@@ -127,7 +127,7 @@ jobs:
         \ as out:\n    out.write('## Moto Reto 3D\\n\\n[APK y captura real]('+release['html_url']+')\\n\\nSHA256\
         \ APK: `'+hashlib.sha256(apk.read_bytes()).hexdigest()+'`\\n')\n"
 
-# MOTO_PAYLOAD /Td6WFoAAATm1rRGAgAhARYAAAB0L+Wj4n//kqZdABcL3ASAUDIm7h19G/PyyzPs7Pg38OrWeznBvBtWH3VunhnX8ZVi1dutW8VtrRSGQpkg6g
+# MOTO_PAYLOAD /Td6WFoAAATm1rRGAgAhARYAAAB0L+Wj4n//k3JdABcL3ASAUDIm7h19G/PyyzPs7Pg38OrWeznBvBtWH3VunhnX8ZVi1dutW8VtrRSGQpkg6g
 # MOTO_PAYLOAD BUZhYzjFPmRgpt8Sr36ax77MD2NEFCLhPwQSmNkKV2TddGzQHBseN0uCTD+IX9cmGayNjn1bSU2TKBN9/rEkX8PITQXMWDJxOlppxHr141mutM
 # MOTO_PAYLOAD 6xtW/xT1OTFTkzO/xJ+iv4vQC/W36QuTvlo1loIFAVSmSCI7B//7aaMc5tu/9WVYnWNwpvHKWAilwoYM/TqrqHKvbtCfIpv2F8cRO5Da9PxpyN
 # MOTO_PAYLOAD 9CpGBY49owJsqWiMoidekuahyGzxymhV/D4S4jd2ivRt8zyQtfQiRG8mcFv6lM5Dmeo8+QC9pkaa7bS5zB/FE4+6YDPuslFzL/jsew3cunfynb
@@ -565,21 +565,24 @@ jobs:
 # MOTO_PAYLOAD TCLq4n3Vg3ebCw/Cj2IsRb+smIl1L/zxiQ5n6P7ixp//8cdYM+q/22mcEg45y9UeQUHYH9m34x0xoITjv4eBFDnIRpoiuuWTR0fW1KRrQ7LivC
 # MOTO_PAYLOAD IdYU8qYIr+M05VA+ThEGh5k7fL1HO/3vXu6+umHmVJ1WYSQYnSLWKE+RcBwKOUwl5tGwYLLzmcqPnxIx8yRGvbc+AGc+MHqdH11Cq75xWYbOIn
 # MOTO_PAYLOAD qQj+Z2TQe4Zk53oD1U3B7UQk38FB/Y+oNb2gTY/Y3zBKcQxTA/R5UlmXoJcUe+idiuEa0KeVxzBUEpZZ2zHVBq0qEiuWRprC9t8aTFmgif4leR
-# MOTO_PAYLOAD 9xDbTxaw9diZzK6VgQI+hi9LghVJu+xmsZ3t7cDfPlw5MAEr7vTZXxV3aTt4etNeWMAh3cd2A0fQf3AyVwrzJBHb9IwRBHGHm95inAPqG6cOuy
-# MOTO_PAYLOAD 7Qe0hoUuC70kVVxiixpQ4fj4e496GpDR/b/+1V/tsdLEVO9OrnodyI/pl3lOFt52bwObrColDLl4jbDsOSN9VdYXAT6DEl7U+wAvpi/BBqabAJ
-# MOTO_PAYLOAD Novm+nGmHnylmwtpLOh1rKkjC+l8Vl7Sn2Ugr6XPzXfX2Q8fwJNGui+k2LNXhtL4o5+o6m9FVWqgcFbkVM0W+aqHVL4qsR14BiDqrnRzx6eff6
-# MOTO_PAYLOAD Mdk9/gybSiMCL9wnuA+wuj8U0c32pwr2YW2RxnPIPpM04fGzWEYhJNoJXDK6t/VGe3OPKeqFt+LguK0fp8FPkaJYGcWvVYByavvRY1MOtd6o3m
-# MOTO_PAYLOAD PUEv/TAJpU8mz9nuLjVxAuPeVE+ah1gA6LPzD/Q25SWZ21cKUWqZpBiqhhyvykLni06/ZavhukvpzCg4Pkf5zYnkNDpzSST4jPlJCjKTpuRIE1
-# MOTO_PAYLOAD LSjw1D3fUItX2KP25b7ZGjmAqJh/eE94jBLd4z7yvNYOgIlzSLGmfZ51G7KuMH9Czww+fThBIeeSX3KTMQBv8KCbtieyrqMQJeI87Vbpi70oFR
-# MOTO_PAYLOAD cTUu3bj86JM6Z4DEChEDq/5jUF4qlnJJbL/lr/ie6tcZHgHsxru9tMWY1xyv8xtcXrMjyowSALAx705wRUmQY0M0oSwWowtxK5bSqpvMKpi/f/
-# MOTO_PAYLOAD zW31zYAdsQ50dSjJ2JgB/Y5e+4LPFbCn1F0CBhNHn000We1zHxJoVbAG0NItHdT/h2ZP2tlE1ts6YSx4gaT8RftDvyHY2xt8YXhG7N/LXnym7l
-# MOTO_PAYLOAD lXbLiSlrNVNwv8kl5DORXJzGZC5RgkXHgBGsFCNyu5nmc7reczRvA5XVLtmKmaB4gmbbC/pX5nffH18CR2GP0jIWfBeCYfbwyvK/61oNLaPivt
-# MOTO_PAYLOAD 2lR+zNOYLLhf+IEYaLey1/hshw/p2j62zZd2+i9SwfmH1qAG74gaovpxl54vs7anJL/FmwhIrmK7JYr+eajF2Euf5sLEOcO5DafP8BDQIAKnI/
-# MOTO_PAYLOAD 4HqcEEdK8sLD5FMHahG0mzh7vZAkjB/Pkd20r80+RmNL5HmfRm96TSLOuVbKWwnmWXljoAzzBz3Dva8+af4i4KC8KzRq1RZZLBD0KePd4rhgjr
-# MOTO_PAYLOAD Jjb29rtOWbijd2oVowgyrZm2og+AHhXY645yA6x3tu2bhW5zoPtLXPcBfUP0Jt8zElzeFYgFwu82ICZpCd9kfQxa6PjfLwpwfpV4icD7TYfZC9
-# MOTO_PAYLOAD AfQDXXpGhoxkhmaO4iHn8ePjn7WZKALNyrlcfN+NPSnWwnVFwSem4KuJjxtK1HM+su1XCHcjiA1HA4DsCOC7CX9CYDaqEvWM7S87N76PTJz1Kl
-# MOTO_PAYLOAD wFXE+SGqc0ZYQQ+O3qIR+EnAqIEfOp2RLhlDr3qmNQGgGS0Ogw2igZl5ilURVpeVVoj4B/Pzc7iuXdgidOAJraqTVCzXkfsqei1mXyjesS4hK2
-# MOTO_PAYLOAD mhtlw6zYnVuFhXLh+Y6vCdwD4eGn27zvtmUbuk3lDhsyfuR5hEuBY8kp9SoP6vnFreoyn+WqBPn35XLpzfH1I602Gzv3hbhVeREpozl5wNWNgI
-# MOTO_PAYLOAD kcjNFDWGj84HkZNKGehaqjciGbbEBrIiXjs0Q7LUVGVv7j9eC+yLHqmdG/ce9biryP0Cd7PlTM5Rpji1r3JtC3WRkI36VltMI2wdiUPaG/Uzca
-# MOTO_PAYLOAD ZCgwOBdPDH2iZvTGtWsar6+u0zZs6d21FOUYjI5uhAWI51ObhoDk9yEyDk1sRe3M3xPDRVa6X2xWj+ke4/qiS6td34B0uRokt2oGgudQM7QfE+
-# MOTO_PAYLOAD XcsQF/sqnnpACcH+LqNWkVnFkwto88X5h2A30Hfm9mVQhDAgAAAI06t2hZ+JuKAAHCpQKAgAra2di3scRn+wIAAAAABFla
+# MOTO_PAYLOAD 9xDbTxaw9diZzK6VgQI+hi9LghVJu+xmsZ3t7cDfPlw5MAEr7vTZXxV3aTt4etNeWMAh3cd2A0fQf3AyVwrzJBHb9KtgUcviYBWuvZPfKPSoLJ
+# MOTO_PAYLOAD zzyA7z96ThXxNCnZdknkQzdkGY8Xn0253WaG48kSnCJtt3snWP68CMua3SuiHZcz5oe930C0IbUt3m6BCsp05vhbcz4VqxIZeoNDjJmx9uA94Q
+# MOTO_PAYLOAD 9pDzfGkx/d0WvK3e37x/4yamvHUjBnuYCsRpiV6XrLOq8Kn2zYEJrvOsvRgK1P4nVX7UUaCQJYjC7kR+av3kA2nnw6VcPIfE+D6yQL0UuAPCLS
+# MOTO_PAYLOAD SWkm/h44qhiZiN1wMuKPXBZjXQ3ZwznZgwpDZ/qHGQf4Wj3TGV54MGTPBkHnuiVyz3HBiNQOAOSnI1kC9noN0upy2682YUGHoXUd1eWXdkar+D
+# MOTO_PAYLOAD POj2gwmJjzGoKvd3h26Vt0n5q77IVnO0r4v3SMML53RlsBfiQxcHI5y4cDJ4W3E6SiU7ZrY3WoZ2NHjvmMgDxDSh/LDOuCEaBwMHsXg09tsWDj
+# MOTO_PAYLOAD RhE+gekghtd3qBgkEnr9u9twS5WzcmS2RxKXQQteCniT4epAYTNcBzYW4N6k+tH7H1uTydA891Qe+aKR6H/05CLx+zZWS+az9e1h2d2pFMTljr
+# MOTO_PAYLOAD Z87ybJxS8MGb6FGMUSjnVCmpeOjr/6lbGaflyqfvf5sqipIQZ5cD/K9NJOh8LWLQXSeMhGlVvyThB7juFen1YKTxFuy/OZwN03EHaR7Jkjaw3S
+# MOTO_PAYLOAD 12BfXyNtsN5CHm/jkguCkilE5knloMu3ITVqcMDRsXXiUisBTrFqDzpcAP4JEf46pCkXddVqYHeAgIhPW58cRHc9i8JHgNjby8bGcWwWVXN2C/
+# MOTO_PAYLOAD gmMo9TMJH/y4bk5BqCpJJH9O6CPL9298aHZrkLpOmUEXt0FtYcSmVv+Jt/nkxDD469WuE8dHd71HvzPGNjyn+Kluz09pHtoVdZLvYsJ9QJLD9H
+# MOTO_PAYLOAD lLou5Ck5U9yixKZ8Kwr39YpeLBE2Dq2CdQwjYyhw0U9/SgoXgE4O+EueJZPLnsKPWx+psBbwYXW9n4PFnT/jGgJlHriddQmGyN49bYj3WayV6d
+# MOTO_PAYLOAD 4F4U65sGXMZNe1vsAmaJLhgV+3qmDBVw/m4uwWkJdYbUUdf1VR0H3bUs26/CKO9PRsMLuZeUmVQjgxjM1lmABFXpqjRNIp7gJnHtz7xk03PfM7
+# MOTO_PAYLOAD 1VwIG5+XmNgS/oBblz0LmDzTTtRfpBjT7UTVa7WxESPRUGbBTQUmNOiv8h/btBpmpdMoTxS7as5TRftJHWBzXNL8TWGIFnfVTW2vJAH/keriFj
+# MOTO_PAYLOAD rnZEEh41p3qyfFblJ9drcBFSDduc8z5c7Et6NuuVk1bv9GJKajLDme18IumvKTpRUIs1NzIT8Pz82mcrc41KpJcuxUvEXxr8fqjmxh3UF+iTyJ
+# MOTO_PAYLOAD 1aB5fPdPMLFALoXdvRrvVa5G/bLh3hYcUiji4adH/87hrLPoFgFQHMdsdTqw9ngugTsPEBkjxpLQM4iOBJwwEv2WCM5wUCGcN4eRjD76g3wqzk
+# MOTO_PAYLOAD gmKJjl8cOYcVAvSumHviCwonurtIuQO8oc8ccHPzneZVWt44UfDb6L6LBiVT+gPRmubYJ/9tmZ1v9XGLFsudy4pNPRir45uoifB1X/H7wmh6lZ
+# MOTO_PAYLOAD DjfmHL+Y2t5aeg0lALuuLcZloj9O0ZOTi9dk6iQHZcdDutiq6p+XxAGhBnzWuGNg+RLcegI17QcTPgvfI1zgerK5GHpbraZ0uuIQ45MQkRdQYp
+# MOTO_PAYLOAD 1z0KnsBgeIwLWqBRZaolCE/7c5ILDI+CAnWPin3qwRlByOjeXCvMQs5uvyritBiI/rw2G7qX2YmIrCGxFavBcvq9eCcTlBgSkGd9KR5a51anjV
+# MOTO_PAYLOAD x1RnLoFRMtFqMx4TcXV/rRDqqt1JyVeG/KotsSSZOSNHe/ZPbHieHwMMqBtmWUeFOb1hp/GcDfpEx3iYIJgFW2du3QPWZpO3cEVIFTK2cjdY5H
+# MOTO_PAYLOAD NJ9zbBKb8iXjq5LyxPoM5Lbag5TUGxzAFYThthvb+XbFbcuibCQYhqvyKxU+qryQm4NdGWYC6efIpgBsazCObKgXXe/gpun4/JbDBSI2EJKUnG
+# MOTO_PAYLOAD RdZqGH5U8NtifkRPkSwUp03+CRPsTpsZzcNDfZsyxlZF/Lp+pkYhk0r/GsOQgxH0kLr2Tedy2PET6S+EM3/0kv9Jkz0O+eQCWwvAAAANh3pQw7
+# MOTO_PAYLOAD RWRqAAGOpwKAgAqtQIK1scRn+wIAAAAABFla
