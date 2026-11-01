@@ -145,7 +145,7 @@ jobs:
         root=pathlib.Path('_moto_reto');apk=root/'build/Moto-Reto-0.3-Costa.apk';capture=root/'build/Moto-Reto-3D-Captura.png'
         if not apk.is_file() or not capture.is_file():raise SystemExit('Falta APK o captura real. No se publica.')
         source=pathlib.Path('Moto-Reto-3D-Codigo.zip')
-        with zipfile.ZipFile(source,'w',zipfile.ZIP_DEFLATED) as archive:
+        with zipfile.ZipFile(source,'w',zipfile.ZIP_DEFLATED,strict_timestamps=False) as archive:
             for p in sorted(root.rglob('*')):
                 if p.is_file() and not any(v in {'.godot','build','__pycache__'} for v in p.relative_to(root).parts):
                     archive.write(p,str(pathlib.Path('Moto-Reto-3D')/p.relative_to(root)))
