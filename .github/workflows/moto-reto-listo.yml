@@ -3,7 +3,7 @@ name: Moto Reto - APK demo 3D
   workflow_dispatch: null
   push:
     paths:
-    - .github/workflows/moto-reto.yml
+    - .github/workflows/moto-reto-listo.yml
 permissions:
   contents: write
 concurrency:
@@ -19,15 +19,23 @@ jobs:
     - uses: actions/checkout@v4
       with:
         persist-credentials: false
+    - name: Comprobar repositorio de destino
+      run: test "$GITHUB_REPOSITORY" = "adam-tunnel-2026/moto-reto"
     - name: Recuperar proyecto 3D verificado
       shell: python
-      run: "import base64,hashlib,io,pathlib,tarfile\nsource=pathlib.Path('.github/workflows/moto-reto.yml').read_text()\n\
-        blob=base64.b64decode(''.join(line[len('# MOTO_PAYLOAD '):] for line in source.splitlines() if line.startswith('#\
-        \ MOTO_PAYLOAD ')),validate=True)\nif hashlib.sha256(blob).hexdigest()!='8dfc9b1a6e3cce647cddffef43fb16063d9bd19c0a398ee6ad1c4842040c3845':\n\
-        \    raise SystemExit('El proyecto está incompleto o modificado.')\nroot=pathlib.Path('_moto_reto');root.mkdir(exist_ok=True)\n\
-        with tarfile.open(fileobj=io.BytesIO(blob),mode='r:xz') as tar:\n    for member in tar.getmembers():\n \
-        \       path=pathlib.PurePosixPath(member.name)\n        if not member.isfile() or path.is_absolute() or\
-        \ '..' in path.parts:\n            raise SystemExit('Ruta no permitida')\n    tar.extractall(root,filter='data')\n"
+      run: |
+        import base64,hashlib,io,pathlib,tarfile
+        source=pathlib.Path('.github/workflows/moto-reto-listo.yml').read_text()
+        blob=base64.b64decode(''.join(line[len('# MOTO_PAYLOAD '):] for line in source.splitlines() if line.startswith('# MOTO_PAYLOAD ')),validate=True)
+        if hashlib.sha256(blob).hexdigest()!='8dfc9b1a6e3cce647cddffef43fb16063d9bd19c0a398ee6ad1c4842040c3845':
+            raise SystemExit('El proyecto está incompleto o modificado.')
+        root=pathlib.Path('_moto_reto');root.mkdir(exist_ok=True)
+        with tarfile.open(fileobj=io.BytesIO(blob),mode='r:xz') as tar:
+            for member in tar.getmembers():
+                path=pathlib.PurePosixPath(member.name)
+                if not member.isfile() or path.is_absolute() or '..' in path.parts:
+                    raise SystemExit('Ruta no permitida')
+            tar.extractall(root,filter='data')
     - name: Revisar estructura
       run: python3 _moto_reto/tests/verify_project.py
     - uses: actions/setup-java@v4
@@ -42,25 +50,43 @@ jobs:
       run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
     - name: Instalar Godot y plantilla oficiales
       shell: python
-      run: "import hashlib,os,pathlib,shutil,urllib.request,zipfile\nbase='https://github.com/godotengine/godot-builds/releases/download/4.4.1-stable/'\n\
-        cache=pathlib.Path('_godot_download');cache.mkdir(exist_ok=True)\ndef download(name):\n    target=cache/name\n\
-        \    request=urllib.request.Request(base+name,headers={'User-Agent':'MotoReto3D-Build'})\n    with urllib.request.urlopen(request,timeout=120)\
-        \ as source,target.open('wb') as out:\n        shutil.copyfileobj(source,out,1024*1024)\n    return target\n\
-        checks=download('SHA512-SUMS.txt').read_text()\nexpected={line.split()[-1].lstrip('*'):line.split()[0] for\
-        \ line in checks.splitlines() if len(line.split())>=2}\ndef verified(name):\n    target=download(name);sha=hashlib.sha512()\n\
-        \    with target.open('rb') as stream:\n        for block in iter(lambda:stream.read(1024*1024),b''):sha.update(block)\n\
-        \    if sha.hexdigest()!=expected.get(name):raise SystemExit('La descarga de Godot no coincide: '+name)\n\
-        \    return target\nengine=verified('Godot_v4.4.1-stable_linux.x86_64.zip')\nbin_dir=pathlib.Path('_godot_bin');bin_dir.mkdir(exist_ok=True)\n\
-        with zipfile.ZipFile(engine) as archive:\n    payload=archive.read('Godot_v4.4.1-stable_linux.x86_64')\n\
-        exe=bin_dir/'godot';exe.write_bytes(payload);exe.chmod(0o755)\nwith open(os.environ['GITHUB_PATH'],'a')\
-        \ as out:out.write(str(bin_dir.resolve())+'\\n')\ntemplates=verified('Godot_v4.4.1-stable_export_templates.tpz')\n\
-        destination=pathlib.Path.home()/'.local/share/godot/export_templates/4.4.1.stable'\ndestination.mkdir(parents=True,exist_ok=True)\n\
-        with zipfile.ZipFile(templates) as archive:\n    with archive.open('templates/android_debug.apk') as source,(destination/'android_debug.apk').open('wb')\
-        \ as out:\n        shutil.copyfileobj(source,out,1024*1024)\ntemplates.unlink()\nconfig=pathlib.Path.home()/'.config/godot';config.mkdir(parents=True,exist_ok=True)\n\
-        sdk=os.environ.get('ANDROID_SDK_ROOT') or os.environ['ANDROID_HOME']\njava=os.environ['JAVA_HOME']\nsettings='[gd_resource\
-        \ type=\"EditorSettings\" format=3]\\n\\n[resource]\\nexport/android/android_sdk_path = \"'+sdk+'\"\\nexport/android/java_sdk_path\
-        \ = \"'+java+'\"\\n'\n(config/'editor_settings-4.4.tres').write_text(settings)\nprint('Motor y plantilla\
-        \ oficiales verificados con SHA512. SDK configurado.')\n"
+      run: |
+        import hashlib,os,pathlib,shutil,urllib.request,zipfile
+        base='https://github.com/godotengine/godot-builds/releases/download/4.4.1-stable/'
+        cache=pathlib.Path('_godot_download');cache.mkdir(exist_ok=True)
+        def download(name):
+            target=cache/name
+            request=urllib.request.Request(base+name,headers={'User-Agent':'MotoReto3D-Build'})
+            with urllib.request.urlopen(request,timeout=120) as source,target.open('wb') as out:
+                shutil.copyfileobj(source,out,1024*1024)
+            return target
+        checks=download('SHA512-SUMS.txt').read_text()
+        expected={line.split()[-1].lstrip('*'):line.split()[0] for line in checks.splitlines() if len(line.split())>=2}
+        def verified(name):
+            target=download(name);sha=hashlib.sha512()
+            with target.open('rb') as stream:
+                for block in iter(lambda:stream.read(1024*1024),b''):sha.update(block)
+            if sha.hexdigest()!=expected.get(name):raise SystemExit('La descarga de Godot no coincide: '+name)
+            return target
+        engine=verified('Godot_v4.4.1-stable_linux.x86_64.zip')
+        bin_dir=pathlib.Path('_godot_bin');bin_dir.mkdir(exist_ok=True)
+        with zipfile.ZipFile(engine) as archive:
+            payload=archive.read('Godot_v4.4.1-stable_linux.x86_64')
+        exe=bin_dir/'godot';exe.write_bytes(payload);exe.chmod(0o755)
+        with open(os.environ['GITHUB_PATH'],'a') as out:out.write(str(bin_dir.resolve())+'\n')
+        templates=verified('Godot_v4.4.1-stable_export_templates.tpz')
+        destination=pathlib.Path.home()/'.local/share/godot/export_templates/4.4.1.stable'
+        destination.mkdir(parents=True,exist_ok=True)
+        with zipfile.ZipFile(templates) as archive:
+            with archive.open('templates/android_debug.apk') as source,(destination/'android_debug.apk').open('wb') as out:
+                shutil.copyfileobj(source,out,1024*1024)
+        templates.unlink()
+        config=pathlib.Path.home()/'.config/godot';config.mkdir(parents=True,exist_ok=True)
+        sdk=os.environ.get('ANDROID_SDK_ROOT') or os.environ['ANDROID_HOME']
+        java=os.environ['JAVA_HOME']
+        settings='[gd_resource type="EditorSettings" format=3]\n\n[resource]\nexport/android/android_sdk_path = "'+sdk+'"\nexport/android/java_sdk_path = "'+java+'"\n'
+        (config/'editor_settings-4.4.tres').write_text(settings)
+        print('Motor y plantilla oficiales verificados con SHA512. SDK configurado.')
     - name: Importar y comprobar scripts
       working-directory: _moto_reto
       run: python3 tools/run_checked.py godot --headless --editor --path . --import --quit
@@ -68,32 +94,24 @@ jobs:
       working-directory: _moto_reto
       run: python3 tools/run_checked.py godot --headless --path . --quit-after 120 --script res://tests/race_test.gd
     - name: Preparar captura 3D
-      run: 'sudo apt-get update -qq
-
+      run: |-
+        sudo apt-get update -qq
         sudo apt-get install -y xvfb libgl1-mesa-dri xauth
-
-        mkdir -p _moto_reto/build'
+        mkdir -p _moto_reto/build
     - name: Abrir escena y guardar captura REAL
       working-directory: _moto_reto
       env:
         LIBGL_ALWAYS_SOFTWARE: '1'
         MOTO_CAPTURE_PATH: ${{ github.workspace }}/_moto_reto/build/Moto-Reto-3D-Captura.png
-      run: 'python3 tools/run_checked.py xvfb-run -a -s ''-screen 0 720x1280x24'' godot --path . --rendering-method
-        gl_compatibility --audio-driver Dummy --resolution 540x960 -- --capture
-
-        python3 - <<''PYTEST''
-
+      run: |-
+        python3 tools/run_checked.py xvfb-run -a -s '-screen 0 720x1280x24' godot --path . --rendering-method gl_compatibility --audio-driver Dummy --resolution 540x960 -- --capture
+        python3 - <<'PYTEST'
         from pathlib import Path
-
-        p=Path(''build/Moto-Reto-3D-Captura.png'')
-
-        assert p.is_file() and p.stat().st_size>10000,''Falta una captura válida''
-
-        assert p.read_bytes()[:8]==b''\x89PNG\r\n\x1a\n''
-
-        print(''Captura real de Godot guardada'')
-
-        PYTEST'
+        p=Path('build/Moto-Reto-3D-Captura.png')
+        assert p.is_file() and p.stat().st_size>10000,'Falta una captura válida'
+        assert p.read_bytes()[:8]==b'\x89PNG\r\n\x1a\n'
+        print('Captura real de Godot guardada')
+        PYTEST
     - name: Corregir configuracion SDK Android
       working-directory: _moto_reto
       shell: python
@@ -112,32 +130,40 @@ jobs:
         GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ github.workspace }}/_moto_reto/demo.keystore
         GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
         GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
-      run: 'python3 tools/run_checked.py godot --headless --path . --export-debug ''Android Demo'' build/Moto-Reto-0.2-3D-demo.apk
-
-        "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs build/Moto-Reto-0.2-3D-demo.apk'
+      run: |-
+        python3 tools/run_checked.py godot --headless --path . --export-debug 'Android Demo' build/Moto-Reto-0.2-3D-demo.apk
+        "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs build/Moto-Reto-0.2-3D-demo.apk
+    - name: Guardar APK descargable
+      uses: actions/upload-artifact@v4
+      with:
+        name: Moto-Reto-APK
+        path: _moto_reto/build/Moto-Reto-0.2-3D-demo.apk
+        if-no-files-found: error
     - name: Publicar APK y captura en Releases
       env:
         GH_TOKEN: ${{ github.token }}
       shell: python
-      run: "import hashlib,json,os,pathlib,urllib.request,zipfile\nroot=pathlib.Path('_moto_reto');apk=root/'build/Moto-Reto-0.2-3D-demo.apk';capture=root/'build/Moto-Reto-3D-Captura.png'\n\
-        if not apk.is_file() or not capture.is_file():raise SystemExit('Falta APK o captura real. No se publica.')\n\
-        source=pathlib.Path('Moto-Reto-3D-Codigo.zip')\nwith zipfile.ZipFile(source,'w',zipfile.ZIP_DEFLATED) as\
-        \ archive:\n    for p in sorted(root.rglob('*')):\n        if p.is_file() and not any(v in {'.godot','build','__pycache__'}\
-        \ for v in p.relative_to(root).parts):\n            archive.write(p,str(pathlib.Path('Moto-Reto-3D')/p.relative_to(root)))\n\
-        headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'MotoReto3D-Build'}\n\
-        base='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']\ntag='demo-3d-'+os.environ['GITHUB_RUN_ID']+'-'+os.environ.get('GITHUB_RUN_ATTEMPT','1')\n\
-        body={'tag_name':tag,'target_commitish':os.environ['GITHUB_SHA'],'name':'Moto Reto 0.2 - PRUEBA 3D','prerelease':True,'body':'Primera\
-        \ prueba jugable con Godot: cámara trasera, moto/piloto y tráfico con volumen, asfalto con textura, luz\
-        \ y sombras, costa y mar. Gráficos procedurales: no es el acabado fotorrealista de la imagen conceptual.\
-        \ La captura adjunta procede de la escena abierta por Godot en CI, no de IA. Android debe probarse en el\
-        \ móvil. Sin anuncios ni servidor. Solo pruebas: misma firma pública de desarrollo y paquete com.motoreto.demo,\
-        \ versionCode 2.'}\nreq=urllib.request.Request(base+'/releases',data=json.dumps(body).encode(),headers={**headers,'Content-Type':'application/json'},method='POST')\n\
-        with urllib.request.urlopen(req,timeout=30) as response:release=json.load(response)\nupload=release['upload_url'].split('{')[0]\n\
-        for path,mime in [(apk,'application/vnd.android.package-archive'),(capture,'image/png'),(source,'application/zip')]:\n\
-        \    req=urllib.request.Request(upload+'?name='+path.name,data=path.read_bytes(),headers={**headers,'Content-Type':mime},method='POST')\n\
-        \    with urllib.request.urlopen(req,timeout=120) as response:json.load(response)\nwith open(os.environ['GITHUB_STEP_SUMMARY'],'a')\
-        \ as out:\n    out.write('## Moto Reto 3D\\n\\n[APK y captura real]('+release['html_url']+')\\n\\nSHA256\
-        \ APK: `'+hashlib.sha256(apk.read_bytes()).hexdigest()+'`\\n')\n"
+      run: |
+        import hashlib,json,os,pathlib,urllib.request,zipfile
+        root=pathlib.Path('_moto_reto');apk=root/'build/Moto-Reto-0.2-3D-demo.apk';capture=root/'build/Moto-Reto-3D-Captura.png'
+        if not apk.is_file() or not capture.is_file():raise SystemExit('Falta APK o captura real. No se publica.')
+        source=pathlib.Path('Moto-Reto-3D-Codigo.zip')
+        with zipfile.ZipFile(source,'w',zipfile.ZIP_DEFLATED) as archive:
+            for p in sorted(root.rglob('*')):
+                if p.is_file() and not any(v in {'.godot','build','__pycache__'} for v in p.relative_to(root).parts):
+                    archive.write(p,str(pathlib.Path('Moto-Reto-3D')/p.relative_to(root)))
+        headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'MotoReto3D-Build'}
+        base='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+        tag='demo-3d-'+os.environ['GITHUB_RUN_ID']+'-'+os.environ.get('GITHUB_RUN_ATTEMPT','1')
+        body={'tag_name':tag,'target_commitish':os.environ['GITHUB_SHA'],'name':'Moto Reto 0.2 - PRUEBA 3D','prerelease':True,'body':'Primera prueba jugable con Godot: cámara trasera, moto/piloto y tráfico con volumen, asfalto con textura, luz y sombras, costa y mar. Gráficos procedurales: no es el acabado fotorrealista de la imagen conceptual. La captura adjunta procede de la escena abierta por Godot en CI, no de IA. Android debe probarse en el móvil. Sin anuncios ni servidor. Solo pruebas: misma firma pública de desarrollo y paquete com.motoreto.demo, versionCode 2.'}
+        req=urllib.request.Request(base+'/releases',data=json.dumps(body).encode(),headers={**headers,'Content-Type':'application/json'},method='POST')
+        with urllib.request.urlopen(req,timeout=30) as response:release=json.load(response)
+        upload=release['upload_url'].split('{')[0]
+        for path,mime in [(apk,'application/vnd.android.package-archive'),(capture,'image/png'),(source,'application/zip')]:
+            req=urllib.request.Request(upload+'?name='+path.name,data=path.read_bytes(),headers={**headers,'Content-Type':mime},method='POST')
+            with urllib.request.urlopen(req,timeout=120) as response:json.load(response)
+        with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as out:
+            out.write('## Moto Reto 3D\n\n[APK y captura real]('+release['html_url']+')\n\nSHA256 APK: `'+hashlib.sha256(apk.read_bytes()).hexdigest()+'`\n')
 
 # MOTO_PAYLOAD /Td6WFoAAATm1rRGAgAhARYAAAB0L+Wj4n//k/JdABcL3ASAUDIm7h19G/PyyzPs7Pg38OrWeznBvBtWH3VunhnX8ZVi1dutW8VtrRSGQpkg6g
 # MOTO_PAYLOAD BUZhYzjFPmRgpt8Sr36ax77MD2NEFCLhPwQSmNkKV2TddGzQHBseN0uCTD+IX9cmGayNjn1bSU2TKBN9/rEkX8PITQXMWDJxOlppxHr141mutM
