@@ -121,13 +121,19 @@ jobs:
         print('Motor y plantilla oficiales verificados con SHA512. SDK configurado.')
     - name: Importar y comprobar scripts
       working-directory: _moto_reto
-      run: python3 tools/run_checked.py godot --headless --editor --path . --import --quit
+      run: python3 tools/run_checked.py xvfb-run -a -s '-screen 0 720x1280x24' godot --rendering-method gl_compatibility
+        --audio-driver Dummy --editor --path . --import --quit
+      env:
+        LIBGL_ALWAYS_SOFTWARE: '1'
     - name: Probar reglas de carrera
       working-directory: _moto_reto
       run: python3 tools/run_checked.py godot --headless --path . --quit-after 120 --script res://tests/race_test.gd
     - name: Probar carrocerías e interfaz táctil
       working-directory: _moto_reto
-      run: python3 tools/run_checked.py godot --headless --path . --quit-after 120 --script res://tests/visual_test.gd
+      run: python3 tools/run_checked.py xvfb-run -a -s '-screen 0 720x1280x24' godot --rendering-method gl_compatibility
+        --audio-driver Dummy --path . --quit-after 120 --script res://tests/visual_test.gd
+      env:
+        LIBGL_ALWAYS_SOFTWARE: '1'
     - name: Preparar captura 3D
       run: |
         mkdir -p _moto_reto/build
@@ -158,8 +164,9 @@ jobs:
         GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ github.workspace }}/_moto_reto/demo.keystore
         GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
         GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
+        LIBGL_ALWAYS_SOFTWARE: '1'
       run: |-
-        python3 tools/run_checked.py godot --headless --path . --export-debug 'Android Demo' build/Moto-Reto-0.4.0-Costa.apk
+        python3 tools/run_checked.py xvfb-run -a -s '-screen 0 720x1280x24' godot --rendering-method gl_compatibility --audio-driver Dummy --path . --export-debug 'Android Demo' build/Moto-Reto-0.4.0-Costa.apk
         "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs build/Moto-Reto-0.4.0-Costa.apk
     - name: Guardar APK descargable
       uses: actions/upload-artifact@v4
