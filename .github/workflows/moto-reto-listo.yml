@@ -41,8 +41,28 @@ jobs:
     - name: Preparar herramientas de recursos y render
       run: |
         sudo apt-get update -qq
-        sudo apt-get install -y ffmpeg xvfb libgl1-mesa-dri xauth
+        sudo apt-get install -y ffmpeg xvfb libgl1-mesa-dri libvulkan1 mesa-vulkan-drivers vulkan-tools xauth
         python3 -m pip install 'Pillow>=11,<13'
+    - name: Comprobar controlador Vulkan por software
+      shell: python
+      run: |
+        import os,pathlib,subprocess
+        candidates=sorted(pathlib.Path('/usr/share/vulkan/icd.d').glob('lvp_icd*.json'))
+        if not candidates:
+            raise SystemExit('Mesa Lavapipe no está instalado. Se detiene antes de importar los modelos.')
+        driver=str(candidates[0])
+        runtime=pathlib.Path(os.environ['RUNNER_TEMP'])/'moto-runtime'
+        runtime.mkdir(mode=0o700,exist_ok=True)
+        runtime.chmod(0o700)
+        env=dict(os.environ,VK_DRIVER_FILES=driver,VK_ICD_FILENAMES=driver,LIBGL_ALWAYS_SOFTWARE='1',XDG_RUNTIME_DIR=str(runtime))
+        result=subprocess.run(['xvfb-run','-a','-s','-screen 0 720x1280x24','vulkaninfo','--summary'],env=env,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=60)
+        print(result.stdout,flush=True)
+        if result.returncode or 'VK_KHR_surface' not in result.stdout or not any(name in result.stdout.lower() for name in ['llvmpipe','lavapipe']):
+            raise SystemExit('El controlador Vulkan por CPU no supera la prueba previa. No se importa ni publica la APK.')
+        with open(os.environ['GITHUB_ENV'],'a') as out:
+            for key in ['VK_DRIVER_FILES','VK_ICD_FILENAMES','LIBGL_ALWAYS_SOFTWARE','XDG_RUNTIME_DIR']:
+                out.write(key+'='+env[key]+'\n')
+        print('MOTO_VULKAN_SOFTWARE_OK: '+driver)
     - name: Recuperar recursos preparados
       id: asset-cache
       uses: actions/cache@v4
